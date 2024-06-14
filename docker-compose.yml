@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     depends_on:
@@ -12,10 +14,12 @@ services:
       - DATABASE_HOST=maxscale
       - DATABASE_USER=root
       - DATABASE_PASSWORD=my-secret-pw
-      - DATABASE_NAME=keycloak
+      - DATABASE_NAME=backend_db
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "80:80"
     depends_on:
@@ -25,8 +29,6 @@ services:
     image: dhet/cloakmail-keycloak
     ports:
       - "8080:8080"
-    volumes:
-      - ./keycloak/keycloak-config:/opt/jboss/keycloak/standalone/configuration
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
@@ -35,7 +37,7 @@ services:
       - DB_DATABASE=keycloak
       - DB_USER=root
       - DB_PASSWORD=my-secret-pw
-    command: ["kc.sh", "start-dev"] 
+    command: ["start-dev"]
     depends_on:
       - mariadb
 
@@ -46,12 +48,15 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=my-secret-pw
       - MYSQL_DATABASE=keycloak
+    volumes:
+      - ./db-init:/docker-entrypoint-initdb.d
 
   maxscale:
     image: mariadb/maxscale
     ports:
       - "3308:3306"
     volumes:
-      - ./maxscale/maxscale.conf:/etc/maxscale.conf  
+      - ./maxscale/maxscale.cnf:/etc/maxscale.cnf
+      - ./maxscale/rsyslog.conf:/etc/rsyslog.conf
     depends_on:
       - mariadb

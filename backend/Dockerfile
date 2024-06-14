@@ -1,8 +1,8 @@
-FROM node:16
+FROM node:14-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY package*.json ./
+COPY ./package*.json ./
 
 RUN npm install
 
@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]

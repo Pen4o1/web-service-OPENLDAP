@@ -1,0 +1,25 @@
+{
+    "realm": "myrealm",
+    "clients": [
+      {
+        "clientId": "frontend-client",
+        "enabled": true,
+        "directAccessGrantsEnabled": true,
+        "publicClient": true,
+        "redirectUris": ["http://frontend/*"]
+      }
+    ],
+    "users": [
+      {
+        "username": "admin",
+        "enabled": true,
+        "credentials": [
+          {
+            "type": "password",
+            "value": "admin"
+          }
+        ]
+      }
+    ]
+  }
+  

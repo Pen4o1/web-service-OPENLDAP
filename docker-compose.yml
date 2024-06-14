@@ -7,6 +7,12 @@ services:
       - "8000:8000"
     depends_on:
       - keycloak
+      - maxscale
+    environment:
+      - DATABASE_HOST=maxscale
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=my-secret-pw
+      - DATABASE_NAME=keycloak
 
   frontend:
     build: ./frontend
@@ -16,13 +22,36 @@ services:
       - keycloak
 
   keycloak:
-    build: ./keycloak
+    image: dhet/cloakmail-keycloak
     ports:
       - "8080:8080"
+    volumes:
+      - ./keycloak/keycloak-config:/opt/jboss/keycloak/standalone/configuration
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=mariadb
+      - DB_ADDR=mariadb
+      - DB_DATABASE=keycloak
+      - DB_USER=root
+      - DB_PASSWORD=my-secret-pw
+    command: ["kc.sh", "start-dev"]  # Added command to start Keycloak in development mode
+    depends_on:
+      - mariadb
+
+  mariadb:
+    image: mariadb:10.5
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_DATABASE=keycloak
 
   maxscale:
-    build: ./maxscale
+    image: mariadb/maxscale
     ports:
-      - "3306:3306"
+      - "3308:3306"
+    volumes:
+      - ./maxscale/maxscale.conf:/etc/maxscale.conf  # Ensure this is the correct path to the file
     depends_on:
-      - backend
+      - mariadb
